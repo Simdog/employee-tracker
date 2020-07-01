@@ -5,16 +5,17 @@ const consoleTable = require("console.table");
 
 let connection = mysql.createConnection({
     host: "localhost",
-    port: 8080,
+    port: 3306,
     user: "root",
     password: "opeyemi",
-    database: "employees_db"
+    database: "employeeTracker_db"
 });
 
 const query = util.promisify(connection.query).bind(connection);
 
 connection.connect(function (err) {
     if (err) throw err;
+    console.log(`\nWelcome to the employee tracker / updater.\n`);
 
     startOptions();
 });
@@ -42,13 +43,13 @@ function startOptions () {
                     addEmployee();
                     break;
                 case "View employees":
-                    viewEmployees();
+                    display("employee", "EMPLOYEES");
                     break;
                 case "View departments":
-                    viewDepartment();
+                    display("Department");
                     break;
                 case "View roles":
-                    viewRoles();
+                    display("Role");
                     break;
                 case "Update employee role":
                     updateEmployee ();
@@ -60,6 +61,14 @@ function startOptions () {
         })
 };
 
+function display(tableName, displayName) {
+    connection.query(`SELECT * FROM ${tableName}`, function (err, data) {
+      if (err) throw err;
+      console.table(`\n ${displayName}`.brightWhite, data);
+      startOptions();
+    });
+  }
+  
 function addDepartment () {
     inquirer 
         .prompt ([
@@ -79,7 +88,6 @@ function addDepartment () {
              {
                  id: answer.departmentID,
                  name: answer.departmentName
-
              },
             function (err) {
                 if (err) throw err;
@@ -167,7 +175,7 @@ function addEmployee () {
             {
                 id: answer.employeeID,
                 first_name: answer.employeeFirst,
-                last_name: answer.employeeLast
+                last_name: answer.employeeLast,
                 role_id: answer.employeeRoleID,
                 manager_id: answer.employeeManagerID
             },
@@ -185,36 +193,5 @@ function exitApp () {
     connection.end();
 };
 
-startOptions();
 
-
-// = [
-//     {
-//     type: "list",
-//     message: "What would you like to do today?",
-//     name: "options",
-//     choices: [
-//         {
-//             name: "View Department / Employees",
-//             value: "VIEW",
-
-//         },
-//         {
-//             name: "Update Employees", 
-//             value: "UPDATE"
-//         },
-//         {
-//             name: "Add Departments",
-//             value: "DEPARTMENT",
-
-//         },
-//         {
-//             name: "Exit the app",
-//             value: "EXIT"
-//         }
-//         // "Add department roles",
-//         // "View department roles",
-//         // "Update employee roles",
-//     ]
-// }]
 
